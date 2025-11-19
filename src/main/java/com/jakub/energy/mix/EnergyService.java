@@ -48,51 +48,55 @@ class EnergyService implements EnergyFacade {
 
     @Override
     public OptimalChargingWindowDto getOptimalChargingWindow(int durationHours) {
-            ZonedDateTime tomorrow = LocalDate.now().plusDays(1).atStartOfDay().atZone(ZoneOffset.UTC);
-            ZonedDateTime dayAfterTomorrow = LocalDate.now().plusDays(2).atTime(LocalTime.MAX).atZone(ZoneOffset.UTC);
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime end = now.plusHours(48);
 
-            List<GenerationInterval> intervals = carbonIntensityFacade.getCarbonIntensityGenerationData(tomorrow.toLocalDateTime(), dayAfterTomorrow.toLocalDateTime());
+        List<GenerationInterval> intervals = carbonIntensityFacade.getCarbonIntensityGenerationData(now.toLocalDateTime(), end.toLocalDateTime());
 
-            int intervalNeeded = durationHours *2;
-            double maxCleanEnergy = 0;
-            int optimalStartIndex = 0;
+        int intervalsNeeded = durationHours * 2;
 
-            for (int i=0; i <= intervals.size() - intervalNeeded; i++){
-                double averageCleanEnergy = calculateAverageCleanEnergy(intervals.subList(i, i + intervalNeeded));
-                if (averageCleanEnergy > maxCleanEnergy){
-                    maxCleanEnergy = averageCleanEnergy;
-                    optimalStartIndex = i;
-                }
-            }
+        List<Double> cleanScores = intervals.stream()
+                .map(this::calculateCleanPercentageForInterval)
+                .toList();
 
-            GenerationInterval startInterval = intervals.get(optimalStartIndex);
-            GenerationInterval endInterval = intervals.get(optimalStartIndex + intervalNeeded -1);
-            return new OptimalChargingWindowDto(
-                    startInterval.from(),
-                    endInterval.to(),
-                    maxCleanEnergy
-            );
+        double maxWindowSum = 0;
+        int optimalStartIndex = -1;
 
+        double currentWindowSum = 0;
+        for (int i = 0; i < intervalsNeeded; i++) {
+            currentWindowSum += cleanScores.get(i);
+        }
+        maxWindowSum = currentWindowSum;
+        optimalStartIndex = 0;
 
+        for (int i = 1; i <= cleanScores.size() - intervalsNeeded; i++) {
+            double outgoing = cleanScores.get(i - 1);
+            double incoming = cleanScores.get(i + intervalsNeeded - 1);
 
+            currentWindowSum = currentWindowSum - outgoing + incoming;
 
-    }
-
-    private double calculateAverageCleanEnergy(List<GenerationInterval> generationIntervals) {
-        double totalCleanEnergy = 0;
-        int count = 0;
-
-        for (GenerationInterval interval : generationIntervals){
-            if (interval.generationMix() != null){
-                double cleanPercentage = interval.generationMix().stream()
-                        .filter(mix -> CLEAN_ENERGY_SOURCES.contains(mix.fuel()))
-                        .mapToDouble(GenerationMix::percentage)
-                        .sum();
-                totalCleanEnergy += cleanPercentage;
-                count++;
+            if (currentWindowSum > maxWindowSum) {
+                maxWindowSum = currentWindowSum;
+                optimalStartIndex = i;
             }
         }
-        return count > 0 ? totalCleanEnergy / count : 0;
+
+        GenerationInterval bestStart = intervals.get(optimalStartIndex);
+        GenerationInterval bestEnd = intervals.get(optimalStartIndex + intervalsNeeded - 1);
+
+        return new OptimalChargingWindowDto(
+                bestStart.from(),
+                bestEnd.to(),
+                maxWindowSum / intervalsNeeded
+        );
+    }
+
+    private double calculateCleanPercentageForInterval(GenerationInterval interval) {
+        if (interval.generationMix() == null) return 0.0;
+        return interval.generationMix().stream()
+                .filter(mix -> CLEAN_ENERGY_SOURCES.contains(mix.fuel()))
+                .mapToDouble(GenerationMix::percentage)
+                .sum();
     }
 
     private DailyEnergyMixDto calculateDailyAverage(LocalDate date, List<GenerationInterval> intervals) {
