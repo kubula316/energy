@@ -3,6 +3,7 @@ package com.jakub.energy.mix;
 import com.jakub.energy.carbonintensity.CarbonIntensityApiFacade;
 import com.jakub.energy.carbonintensity.model.GenerationInterval;
 import com.jakub.energy.carbonintensity.model.GenerationMix;
+import com.jakub.energy.mix.exception.ExternalDataFetchException;
 import com.jakub.energy.mix.model.DailyEnergyMixDto;
 import com.jakub.energy.mix.model.OptimalChargingWindowDto;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ class EnergyService implements EnergyFacade {
                     .sorted(Comparator.comparing(DailyEnergyMixDto::date))
                     .collect(Collectors.toList());
         }catch (Exception e){
-            throw new RuntimeException("Failed to fetch three-day energy mix data", e);
+            throw new ExternalDataFetchException("Failed to fetch three-day energy mix data", e);
         }
 
     }
@@ -51,7 +52,12 @@ class EnergyService implements EnergyFacade {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime end = now.plusHours(48);
 
-        List<GenerationInterval> intervals = carbonIntensityFacade.getCarbonIntensityGenerationData(now.toLocalDateTime(), end.toLocalDateTime());
+        List<GenerationInterval> intervals;
+        try {
+            intervals = carbonIntensityFacade.getCarbonIntensityGenerationData(now.toLocalDateTime(), end.toLocalDateTime());
+        } catch (Exception e) {
+            throw new ExternalDataFetchException("Failed to fetch energy data for optimal window calculation", e);
+        }
 
         int intervalsNeeded = durationHours * 2;
 
