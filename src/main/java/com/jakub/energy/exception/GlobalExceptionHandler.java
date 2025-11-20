@@ -17,7 +17,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HandlerMethodValidationException.class)
     public ResponseEntity<Map<String,Object>> handleValidationException(HandlerMethodValidationException e) {
         log.warn("Validation error: {}", e.getMessage());
-
         Map<String,Object> response = new HashMap<>();
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", HttpStatus.BAD_REQUEST.value());
