@@ -4,6 +4,7 @@ import com.jakub.energy.carbonintensity.CarbonIntensityApiFacade;
 import com.jakub.energy.carbonintensity.model.GenerationInterval;
 import com.jakub.energy.carbonintensity.model.GenerationMix;
 import com.jakub.energy.mix.exception.ExternalDataFetchException;
+import com.jakub.energy.mix.model.CleanEnergySource;
 import com.jakub.energy.mix.model.DailyEnergyMixDto;
 import com.jakub.energy.mix.model.OptimalChargingWindowDto;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,6 @@ import java.util.stream.Collectors;
 class EnergyService implements EnergyFacade {
 
     private final CarbonIntensityApiFacade carbonIntensityFacade;
-
-    private static final List<String> CLEAN_ENERGY_SOURCES = List.of("biomass", "nuclear", "hydro", "wind", "solar");
-
 
     @Override
     public List<DailyEnergyMixDto> getThreeDaysEnergyMix() {
@@ -100,7 +98,7 @@ class EnergyService implements EnergyFacade {
     private double calculateCleanPercentageForInterval(GenerationInterval interval) {
         if (interval.generationMix() == null) return 0.0;
         return interval.generationMix().stream()
-                .filter(mix -> CLEAN_ENERGY_SOURCES.contains(mix.fuel()))
+                .filter(mix -> CleanEnergySource.isClean(mix.fuel()))
                 .mapToDouble(GenerationMix::percentage)
                 .sum();
     }
@@ -131,7 +129,7 @@ class EnergyService implements EnergyFacade {
 
     private double calculateCleanEnergyPercentage(Map<String, Double> averagePercentages) {
         return averagePercentages.entrySet().stream()
-                .filter(entry -> CLEAN_ENERGY_SOURCES.contains(entry.getKey()))
+                .filter(entry -> CleanEnergySource.isClean(entry.getKey()))
                 .mapToDouble(Map.Entry::getValue)
                 .sum();
     }
