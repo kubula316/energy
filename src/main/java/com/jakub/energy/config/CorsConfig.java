@@ -1,5 +1,6 @@
 package com.jakub.energy.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -12,10 +13,13 @@ public class CorsConfig {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
 
+            @Value("${cors.allowed-origins}")
+            private String[] allowedOriginsArray;
+
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("${cors.allowed.origins}")
+                        .allowedOrigins(allowedOriginsArray)
                         .allowedMethods("GET")
                         .allowedHeaders("Content-Type", "Accept");
             }
