@@ -10,7 +10,10 @@ import com.jakub.energy.mix.model.OptimalChargingWindowDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +28,7 @@ class EnergyService implements EnergyFacade {
 
     @Override
     public List<DailyEnergyMixDto> getThreeDaysEnergyMix() {
-        ZonedDateTime from = LocalDate.now().atTime(0,1).atZone(ZoneOffset.UTC);
+        ZonedDateTime from = LocalDate.now().atTime(0, 1).atZone(ZoneOffset.UTC);
         ZonedDateTime to = LocalDate.now().plusDays(2).atTime(LocalTime.MAX).atZone(ZoneOffset.UTC);
 
         try {
@@ -39,7 +42,7 @@ class EnergyService implements EnergyFacade {
                     //Sort for frontend convenience
                     .sorted(Comparator.comparing(DailyEnergyMixDto::date))
                     .collect(Collectors.toList());
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ExternalDataFetchException("Failed to fetch three-day energy mix data", e);
         }
 
@@ -104,7 +107,7 @@ class EnergyService implements EnergyFacade {
     }
 
     private DailyEnergyMixDto calculateDailyAverage(LocalDate date, List<GenerationInterval> intervals) {
-        Map<String,Double> totalPercentages = new HashMap<>();
+        Map<String, Double> totalPercentages = new HashMap<>();
         int count = intervals.size();
 
 

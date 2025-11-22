@@ -15,9 +15,9 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<Map<String,Object>> handleValidationException(HandlerMethodValidationException e) {
+    public ResponseEntity<Map<String, Object>> handleValidationException(HandlerMethodValidationException e) {
         log.warn("Validation error: {}", e.getMessage());
-        Map<String,Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Bad Request");
@@ -27,10 +27,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String,Object>> handleIllegalArgumentException(IllegalArgumentException e) {
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("Invalid argument: ", e);
 
-        Map<String,Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", HttpStatus.BAD_REQUEST.value());
         response.put("error", "Bad Request");
@@ -40,10 +40,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String,Object>> handleRuntimeException(RuntimeException e) {
+    public ResponseEntity<Map<String, Object>> handleRuntimeException(RuntimeException e) {
         log.error("Runtime error: ", e);
 
-        Map<String,Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
@@ -53,10 +53,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String,Object>> handleGenericException(Exception e) {
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
         log.error("Unexpected error: ", e);
 
-        Map<String,Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -53,7 +52,7 @@ class EnergyServiceTest {
         GenerationInterval day3_3 = createTestInterval(now.plusDays(2).plusHours(1), 30.0);
 
         when(carbonIntensityFacade.getCarbonIntensityGenerationData(any(), any()))
-                .thenReturn(List.of(day1_1, day1_2, day1_3,day2_1,day2_2,day2_3,day3_1,day3_2,day3_3));
+                .thenReturn(List.of(day1_1, day1_2, day1_3, day2_1, day2_2, day2_3, day3_1, day3_2, day3_3));
 
         List<DailyEnergyMixDto> result = energyService.getThreeDaysEnergyMix();
 

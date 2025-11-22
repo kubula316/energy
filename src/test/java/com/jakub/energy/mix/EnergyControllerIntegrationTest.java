@@ -1,11 +1,9 @@
 package com.jakub.energy.mix;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jakub.energy.carbonintensity.CarbonIntensityApiFacade;
 import com.jakub.energy.carbonintensity.model.CarbonIntensityGenerationResponse;
-import com.jakub.energy.carbonintensity.model.GenerationInterval;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +48,7 @@ public class EnergyControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Integration Test - GET /api/energy/mix - Should return three days energy mix")
     void shouldReturnThreeDaysEnergyMix() throws Exception {
 
         when(restTemplate.getForObject(anyString(), eq(CarbonIntensityGenerationResponse.class)))
@@ -65,6 +64,7 @@ public class EnergyControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Integration Test - GET /api/energy/optimal-charging - Should return optimal charging window")
     void shouldReturnOptimalChargingWindow() throws Exception {
 
         when(restTemplate.getForObject(anyString(), eq(CarbonIntensityGenerationResponse.class)))

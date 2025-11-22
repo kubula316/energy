@@ -22,5 +22,6 @@ public enum CleanEnergySource {
         return Arrays.stream(values())
                 .anyMatch(source -> source.fuelName.equalsIgnoreCase(key));
 
+
     }
 }

@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface EnergyFacade {
     List<DailyEnergyMixDto> getThreeDaysEnergyMix();
+
     OptimalChargingWindowDto getOptimalChargingWindow(int durationHours);
 }
